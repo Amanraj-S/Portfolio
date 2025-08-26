@@ -17,7 +17,8 @@ import TodoImage from '../assets/Todo.png';
 import { motion } from 'framer-motion';
 import emailjs from '@emailjs/browser';
 import snakeImage from '../assets/snake.png';
-
+import acadsphere from '../assets/Acadsphere.png';
+import task from '../assets/Task.png'
 
 const Home = () => {
   const form = useRef();
@@ -191,6 +192,38 @@ const Home = () => {
                       Live Demo
                     </a>
                     <a href="https://github.com/Amanraj-S/Snake-game" target="_blank" rel="noopener noreferrer"
+                      className="bg-gray-800 text-white px-4 py-2 rounded hover:bg-gray-900 transition duration-200">
+                      Code
+                    </a>
+                  </div>
+                </div>
+              </div>
+                <div className="bg-gray-100 rounded-lg shadow-md overflow-hidden flex flex-col">
+                <img src={acadsphere} alt="Weather App" className="w-full h-48 object-cover" />
+                <div className="p-4 flex flex-col items-center">
+                  <h3 className="text-xl font-semibold mb-2">Todo-List App</h3>
+                  <div className="flex space-x-4">
+                    <a href="https://acadsphere.vercel.app/" target="_blank" rel="noopener noreferrer"
+                      className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition duration-200">
+                      Live Demo
+                    </a>
+                    <a href="https://github.com/Amanraj-S/Acadsphere" target="_blank" rel="noopener noreferrer"
+                      className="bg-gray-800 text-white px-4 py-2 rounded hover:bg-gray-900 transition duration-200">
+                      Code
+                    </a>
+                  </div>
+                </div>
+              </div>
+                <div className="bg-gray-100 rounded-lg shadow-md overflow-hidden flex flex-col">
+                <img src={task} alt="Weather App" className="w-full h-48 object-cover" />
+                <div className="p-4 flex flex-col items-center">
+                  <h3 className="text-xl font-semibold mb-2">Todo-List App</h3>
+                  <div className="flex space-x-4">
+                    <a href="https://acadsphere.vercel.app/" target="_blank" rel="noopener noreferrer"
+                      className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition duration-200">
+                      Live Demo
+                    </a>
+                    <a href="https://task-manager-ten-gamma-53.vercel.app/login" target="_blank" rel="noopener noreferrer"
                       className="bg-gray-800 text-white px-4 py-2 rounded hover:bg-gray-900 transition duration-200">
                       Code
                     </a>
