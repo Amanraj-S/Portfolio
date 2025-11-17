@@ -244,7 +244,7 @@ const Home = () => {
         viewport={{ once: false, amount: 0.3 }}
       >
         <div className="bg-[#1a1a1a] text-white rounded-xl shadow-lg p-8 w-full max-w-2xl backdrop-blur-md">
-          <h2 className="text-3xl font-bold text-center mb-6">Contact Us</h2>
+          <h2 className="text-3xl font-bold text-center mb-6">Contact Me</h2>
 
           <form ref={form} onSubmit={sendEmail} className="space-y-4">
             <input
