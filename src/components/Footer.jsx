@@ -1,11 +1,15 @@
-import React from 'react';
+import React from "react";
+import { Heart } from "lucide-react";
 
-const Footer = () => {
+export default function Footer() {
   return (
-    <div className="flex flex-col items-center justify-center px-6 py-4 bg-black text-white text-sm border-t border-gray-800">
-      <p className="mb-2">© 2023 Amanraj S. All rights reserved.</p>
-    </div>
+    <footer className="mt-8 py-8 text-center">
+      <div className="max-w-7xl mx-auto px-6">
+        <p className="text-gray-400">
+          © {new Date().getFullYear()} Amanraj S 
+          <Heart className="inline text-red-400" size={14} />.
+        </p>
+      </div>
+    </footer>
   );
-};
-
-export default Footer;
+}

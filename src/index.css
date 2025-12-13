@@ -1,5 +1,24 @@
 @import "tailwindcss";
+/* tailwind included separately; this file only adds snap helpers and small rules */
+
 html, body, #root {
   height: 100%;
-  margin: 0;
+}
+
+main {
+  /* make sure the scroll container covers the viewport */
+  height: 100vh;
+}
+
+/* scroll-snap helpers (Tailwind also has utilities but this ensures behavior across browsers) */
+.snap-y { scroll-snap-type: y mandatory; -webkit-overflow-scrolling: touch; }
+.snap-start { scroll-snap-align: start; }
+.snap-always { scroll-snap-stop: always; }
+
+/* make anchor smooth fallback for browsers */
+html { scroll-behavior: smooth; }
+
+/* small responsive caps */
+@media (max-width: 768px) {
+  .max-w-7xl { padding-left: 1rem; padding-right: 1rem; }
 }
