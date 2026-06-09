@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X } from 'lucide-react';
+import { personalInfo } from '../utils/data';
 
 const Navbar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -10,15 +11,16 @@ const Navbar = () => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 50);
     };
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   const navItems = [
-    { name: 'Home', href: '' },
     { name: 'About', href: '#about' },
-    { name: 'Tech Stack', href: '#tech-stack' },
+    { name: 'Expertise', href: '#tech-stack' },
     { name: 'Projects', href: '#projects' },
+    { name: 'Experience', href: '#experience' },
+    { name: 'Certifications', href: '#certifications' },
     { name: 'Contact', href: '#contact' }
   ];
 
@@ -26,71 +28,104 @@ const Navbar = () => {
     <motion.nav
       initial={{ y: -100 }}
       animate={{ y: 0 }}
-      className={`fixed top-0 w-full z-50 transition-all duration-500 ${
+      transition={{ duration: 0.8, ease: "easeOut" }}
+      className={`fixed top-0 w-full z-50 transition-all duration-500 border-b ${
         scrolled
-          ? 'bg-gray-900/95 backdrop-blur-xl shadow-2xl shadow-cyan-500/10'
-          : 'bg-transparent'
+          ? 'bg-[#020617]/70 backdrop-blur-xl border-white/10 shadow-2xl'
+          : 'bg-transparent border-transparent'
       }`}
     >
-      <div className="max-w-7xl mx-auto px-6 py-4">
-        <div className="flex items-center justify-between">
-          <motion.h3
-            className="text-2xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent"
+      <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+        <a href="#home" className="relative group">
+          <motion.div
+            className="text-xl font-bold text-white tracking-tight"
             whileHover={{ scale: 1.05 }}
           >
-            Amanraj S
-          </motion.h3>
+            AMANRAJ S<span className="text-cyan-500"></span>
+          </motion.div>
+        </a>
 
-          <div className="md:hidden">
-            <button
-              onClick={() => setMenuOpen(!menuOpen)}
-              className="text-white focus:outline-none"
+        {/* Desktop Menu */}
+        <ul className="hidden md:flex gap-8 items-center bg-white/[0.03] px-6 py-2 rounded-full border border-white/5">
+          {navItems.map((item, index) => (
+            <motion.li
+              key={item.name}
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 + index * 0.1 }}
             >
-              {menuOpen ? <X size={28} /> : <Menu size={28} />}
-            </button>
-          </div>
-
-          <ul className="hidden md:flex gap-8 items-center">
-            {navItems.map((item, index) => (
-              <motion.li
-                key={item.name}
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1 }}
+              <a
+                href={item.href}
+                className="text-sm font-medium text-gray-400 hover:text-white transition-colors duration-300"
               >
-                <a
-                  href={item.href}
-                  className="text-gray-300 hover:text-cyan-400 transition-colors duration-300 font-medium relative group"
-                >
-                  {item.name}
-                  <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-cyan-400 to-blue-500 group-hover:w-full transition-all duration-300" />
-                </a>
-              </motion.li>
-            ))}
-          </ul>
-        </div>
+                {item.name}
+              </a>
+            </motion.li>
+          ))}
+        </ul>
 
-        {menuOpen && (
-          <motion.ul
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            className="md:hidden mt-4 space-y-3 bg-gray-900/95 backdrop-blur-xl rounded-lg p-4"
+        {/* Resume Button */}
+        <motion.div 
+          className="hidden md:block"
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.8 }}
+        >
+          <a
+            href="#contact"
+            className="px-5 py-2.5 text-sm font-semibold bg-white text-gray-950 rounded-lg hover:bg-gray-200 transition-colors shadow-[0_0_15px_rgba(255,255,255,0.1)]"
           >
-            {navItems.map((item) => (
-              <li key={item.name}>
-                <a
-                  href={item.href}
+            Hire Me
+          </a>
+        </motion.div>
+
+        {/* Mobile Menu Toggle */}
+        <div className="md:hidden">
+          <button
+            onClick={() => setMenuOpen(!menuOpen)}
+            className="text-gray-300 hover:text-white focus:outline-none p-2 rounded-lg bg-white/5 border border-white/10"
+            aria-label="Toggle Menu"
+          >
+            {menuOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
+        </div>
+      </div>
+
+      {/* Mobile Menu Dropdown */}
+      <AnimatePresence>
+        {menuOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: -20, filter: "blur(10px)" }}
+            animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+            exit={{ opacity: 0, y: -20, filter: "blur(10px)" }}
+            transition={{ duration: 0.3 }}
+            className="absolute top-20 left-0 w-full bg-[#020617]/95 backdrop-blur-2xl border-b border-white/10 shadow-2xl md:hidden overflow-hidden"
+          >
+            <ul className="flex flex-col py-6 px-6 space-y-4">
+              {navItems.map((item) => (
+                <li key={item.name}>
+                  <a
+                    href={item.href}
+                    onClick={() => setMenuOpen(false)}
+                    className="block text-lg font-medium text-gray-400 hover:text-white transition-colors py-2 border-b border-white/5"
+                  >
+                    {item.name}
+                  </a>
+                </li>
+              ))}
+              <li className="pt-4">
+                 <a
+                  href="#contact"
                   onClick={() => setMenuOpen(false)}
-                  className="block text-gray-300 hover:text-cyan-400 transition-colors py-2"
+                  className="block w-full text-center px-5 py-3 text-sm font-semibold bg-white text-gray-950 rounded-lg hover:bg-gray-200 transition-colors"
                 >
-                  {item.name}
+                  Hire Me
                 </a>
               </li>
-            ))}
-          </motion.ul>
+            </ul>
+          </motion.div>
         )}
-      </div>
+      </AnimatePresence>
     </motion.nav>
   );
 };

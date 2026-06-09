@@ -1,24 +1,47 @@
 @import "tailwindcss";
-/* tailwind included separately; this file only adds snap helpers and small rules */
 
 html, body, #root {
-  height: 100%;
+  background-color: #020617; /* Slate 950 */
+  color: #f8fafc;
+  scroll-behavior: smooth;
+  font-family: "Inter", "Outfit", system-ui, -apple-system, sans-serif;
+  overflow-x: hidden;
 }
 
-main {
-  /* make sure the scroll container covers the viewport */
-  height: 100vh;
+/* Base custom selection style */
+::selection {
+  background-color: rgba(6, 182, 212, 0.3); /* cyan-500 with opacity */
+  color: #fff;
 }
 
-/* scroll-snap helpers (Tailwind also has utilities but this ensures behavior across browsers) */
-.snap-y { scroll-snap-type: y mandatory; -webkit-overflow-scrolling: touch; }
-.snap-start { scroll-snap-align: start; }
-.snap-always { scroll-snap-stop: always; }
+/* Webkit scrollbar (optional, but makes it cleaner) */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #020617;
+}
+::-webkit-scrollbar-thumb {
+  background: #1e293b;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #334155;
+}
 
-/* make anchor smooth fallback for browsers */
-html { scroll-behavior: smooth; }
-
-/* small responsive caps */
-@media (max-width: 768px) {
-  .max-w-7xl { padding-left: 1rem; padding-right: 1rem; }
+/* Lenis Recommended CSS */
+html.lenis, html.lenis body {
+  height: auto;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+.lenis.lenis-scrolling iframe {
+  pointer-events: none;
 }

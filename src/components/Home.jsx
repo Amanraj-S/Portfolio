@@ -1,5 +1,5 @@
 import { useRef, useState, useEffect } from "react";
-import { motion, useScroll, useTransform, useSpring } from "framer-motion";
+import { motion, useScroll, useTransform } from "framer-motion";
 import {
   Github,
   Linkedin,
@@ -8,6 +8,8 @@ import {
   ExternalLink,
   Code2,
   Sparkles,
+  CheckCircle2,
+  XCircle
 } from "lucide-react";
 import emailjs from "@emailjs/browser";
 
@@ -31,36 +33,63 @@ import snakeImage from "../assets/snake.png";
 import acadsphere from "../assets/Acadsphere.png";
 import task from "../assets/Task.png";
 
+// --- STATIC DATA EXTRACTED FOR PERFORMANCE ---
+// Moving these outside the component prevents them from being redefined on every render.
+const socialLinks = [
+  { name: "LinkedIn", icon: Linkedin, href: "https://www.linkedin.com/in/amanraj-s-8036812ba/", color: "hover:text-blue-500 hover:border-blue-500" },
+  { name: "GitHub", icon: Github, href: "https://github.com/Amanraj-S", color: "hover:text-gray-300 hover:border-gray-300" },
+  { name: "Instagram", icon: Instagram, href: "https://www.instagram.com/amanrajs2312/", color: "hover:text-pink-500 hover:border-pink-500" },
+];
+
+const techItems = [
+  { name: "HTML", img: htmlLogo },
+  { name: "CSS", img: cssLogo },
+  { name: "JavaScript", img: jsLogo },
+  { name: "React", img: reactLogo },
+  { name: "Tailwind CSS", img: tailwindLogo },
+  { name: "Node.js", img: nodeLogo },
+  { name: "MongoDB", img: mongoLogo },
+  { name: "Python", img: pythonLogo },
+  { name: "MySQL", img: mysqlLogo },
+  { name: "GitHub", img: githubIcon },
+];
+
+const projects = [
+  { title: "Weather App", description: "Real-time weather tracking with beautiful UI", demo: "https://weather-app-plum-zeta-10.vercel.app/", code: "https://github.com/Amanraj-S/Weather-App", img: WeatherAppImage },
+  { title: "Todo-List App", description: "Task management with smooth animations", demo: "https://todo-app-three-tau-13.vercel.app/", code: "https://github.com/Amanraj-S/todo-app", img: TodoImage },
+  { title: "Snake Game", description: "Classic game with modern twist", demo: "https://snake-game-delta-murex.vercel.app/", code: "https://github.com/Amanraj-S/Snake-game", img: snakeImage },
+  { title: "Acadsphere", description: "Student academic progress tracker", demo: "https://acadsphere.vercel.app/", code: "https://github.com/Amanraj-S/Acadsphere", img: acadsphere },
+  { title: "Tasklytic", description: "Task analytics & productivity insights", demo: "https://task-manager-ten-gamma-53.vercel.app/login", code: "https://github.com/Amanraj-S/task-manager", img: task },
+];
+
+// --- ANIMATION VARIANTS ---
+const fadeInUp = {
+  hidden: { opacity: 0, y: 40 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } }
+};
+
+const staggerContainer = {
+  hidden: { opacity: 0 },
+  visible: { opacity: 1, transition: { staggerChildren: 0.1, delayChildren: 0.1 } }
+};
+
 const Home = () => {
   const containerRef = useRef(null);
   const form = useRef(null);
 
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  // Form State
   const [sending, setSending] = useState(false);
+  const [formStatus, setFormStatus] = useState({ type: "", message: "" });
 
-  // --- SCROLL ANIMATION HOOKS ---
+  // Scroll Animation Hooks
   const { scrollY } = useScroll();
-  
-  // Parallax: Hero text moves slower than scroll (0px scroll -> 0px y, 500px scroll -> 200px y)
-  const heroY = useTransform(scrollY, [0, 500], [0, 200]);
-  // Opacity: Hero fades out as you scroll down
+  const heroY = useTransform(scrollY, [0, 500], [0, 150]);
   const heroOpacity = useTransform(scrollY, [0, 300], [1, 0]);
-  
-  // Spring physics for mouse glow (makes it smoother)
-  const springX = useSpring(mousePosition.x, { stiffness: 100, damping: 30 });
-  const springY = useSpring(mousePosition.y, { stiffness: 100, damping: 30 });
 
+  // Ideally, move these to a .env file (e.g., import.meta.env.VITE_EMAILJS_PUBLIC_KEY)
   const EMAILJS_PUBLIC_KEY = "tmmJYdzfdiUn-jQ7p";
   const EMAILJS_SERVICE = "service_8cz5j8k";
   const EMAILJS_TEMPLATE = "template_n1omigy";
-
-  useEffect(() => {
-    const handleMouseMove = (e) =>
-      setMousePosition({ x: e.clientX, y: e.clientY });
-
-    window.addEventListener("mousemove", handleMouseMove);
-    return () => window.removeEventListener("mousemove", handleMouseMove);
-  }, []);
 
   useEffect(() => {
     if (EMAILJS_PUBLIC_KEY) {
@@ -77,6 +106,8 @@ const Home = () => {
     if (!form.current) return;
 
     setSending(true);
+    setFormStatus({ type: "", message: "" });
+
     try {
       const result = await emailjs.sendForm(
         EMAILJS_SERVICE,
@@ -84,272 +115,159 @@ const Home = () => {
         form.current
       );
       if (result && (result.status === 200 || result.status === 202 || result.text)) {
-        alert("Message sent successfully!");
+        setFormStatus({ type: "success", message: "Message sent successfully! I'll get back to you soon." });
         form.current.reset();
       } else {
-        alert("Message submission returned unexpected result. Check console.");
-        console.log("EmailJS result:", result);
+        throw new Error("Unexpected response status.");
       }
     } catch (error) {
       console.error("EmailJS error:", error);
-      if (error && error.status === 404) {
-        alert("EmailJS: Account not found (404). Check Service ID / Template ID / Public Key.");
-      } else {
-        alert("Failed to send message. Please try again later.");
-      }
+      setFormStatus({ type: "error", message: "Failed to send message. Please try again later." });
     } finally {
       setSending(false);
+      // Clear message after 5 seconds
+      setTimeout(() => setFormStatus({ type: "", message: "" }), 5000);
     }
-  };
-
-  const socialLinks = [
-    { icon: Instagram, href: "https://www.instagram.com/amanrajs2312/", color: "hover:text-pink-500" },
-    { icon: Linkedin, href: "https://www.linkedin.com/in/amanraj-s-8036812ba/", color: "hover:text-blue-500" },
-    { icon: Github, href: "https://github.com/Amanraj-S", color: "hover:text-gray-300" },
-  ];
-
-  const techItems = [
-    { name: "HTML", img: htmlLogo },
-    { name: "CSS", img: cssLogo },
-    { name: "JavaScript", img: jsLogo },
-    { name: "React", img: reactLogo },
-    { name: "Tailwind CSS", img: tailwindLogo },
-    { name: "Node.js", img: nodeLogo },
-    { name: "MongoDB", img: mongoLogo },
-    { name: "Python", img: pythonLogo },
-    { name: "MySQL", img: mysqlLogo },
-    { name: "GitHub", img: githubIcon },
-  ];
-
-  const projects = [
-    { title: "Weather App", description: "Real-time weather tracking with beautiful UI", demo: "https://weather-app-plum-zeta-10.vercel.app/", code: "https://github.com/Amanraj-S/Weather-App", img: WeatherAppImage, gradient: "from-blue-500 to-cyan-500" },
-    { title: "Todo-List App", description: "Task management with smooth animations", demo: "https://todo-app-three-tau-13.vercel.app/", code: "https://github.com/Amanraj-S/todo-app", img: TodoImage, gradient: "from-purple-500 to-pink-500" },
-    { title: "Snake Game", description: "Classic game with modern twist", demo: "https://snake-game-delta-murex.vercel.app/", code: "https://github.com/Amanraj-S/Snake-game", img: snakeImage, gradient: "from-green-500 to-emerald-500" },
-    { title: "Acadsphere", description: "Student academic progress tracker", demo: "https://acadsphere.vercel.app/", code: "https://github.com/Amanraj-S/Acadsphere", img: acadsphere, gradient: "from-orange-500 to-red-500" },
-    { title: "Tasklytic", description: "Task analytics & productivity insights", demo: "https://task-manager-ten-gamma-53.vercel.app/login", code: "https://github.com/Amanraj-S/task-manager", img: task, gradient: "from-indigo-500 to-purple-500" },
-  ];
-
-  // --- ANIMATION VARIANTS ---
-  const fadeInUp = {
-    hidden: { opacity: 0, y: 60 },
-    visible: { 
-      opacity: 1, 
-      y: 0,
-      transition: { duration: 0.6, ease: "easeOut" }
-    }
-  };
-
-  const staggerContainer = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1,
-        delayChildren: 0.2
-      }
-    }
-  };
-
-  const scaleOnHover = {
-    rest: { scale: 1 },
-    hover: { scale: 1.05, transition: { duration: 0.3, ease: "easeInOut" } }
   };
 
   return (
-    <div ref={containerRef} className="relative text-white overflow-hidden selection:bg-cyan-500/30">
+    <main ref={containerRef} className="relative text-white overflow-hidden selection:bg-cyan-500/30 font-sans">
       
-      {/* GLOBAL BACKGROUND */}
-      <div className="fixed inset-0 -z-20 bg-gradient-to-b from-black via-[#020817] to-[#001f2e]" />
-
-      {/* PARALLAX GLOW 1 */}
+      {/* GLOBAL BACKGROUND - Refined for a more premium look */}
+      <div className="fixed inset-0 -z-20 bg-[#020617]" />
+      
+      {/* PARALLAX GLOWS - Subtler gradients */}
       <motion.div
         className="fixed inset-0 -z-10"
-        animate={{ y: [-20, 20, -20] }}
-        transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
-        style={{
-          background: "radial-gradient(circle at 20% 30%, rgba(0,255,255,0.15), transparent 70%)",
-        }}
+        animate={{ opacity: [0.3, 0.5, 0.3] }}
+        transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+        style={{ background: "radial-gradient(circle at 15% 30%, rgba(34, 211, 238, 0.08), transparent 50%)" }}
       />
-
-      {/* PARALLAX GLOW 2 */}
       <motion.div
         className="fixed inset-0 -z-10"
-        animate={{ y: [15, -15, 15] }}
-        transition={{ duration: 14, repeat: Infinity, ease: "easeInOut" }}
-        style={{
-          background: "radial-gradient(circle at 80% 60%, rgba(0,150,255,0.12), transparent 70%)",
-        }}
+        animate={{ opacity: [0.2, 0.4, 0.2] }}
+        transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+        style={{ background: "radial-gradient(circle at 85% 60%, rgba(59, 130, 246, 0.08), transparent 50%)" }}
       />
 
-      {/* PARTICLES - Slightly slower for elegance */}
-      {[...Array(80)].map((_, i) => (
-        <motion.div
-          key={i}
-          className="absolute w-1 h-1 bg-cyan-400/20 rounded-full"
-          style={{
-            left: `${Math.random() * 100}%`,
-            top: `${Math.random() * 300}%`,
-          }}
-          animate={{ opacity: [0.1, 0.8, 0.1] }}
-          transition={{
-            duration: 4 + Math.random() * 4,
-            repeat: Infinity,
-            delay: Math.random() * 5
-          }}
-        />
-      ))}
-
-      {/* ================= HERO SECTION (With Parallax) ================= */}
+      {/* ================= HERO SECTION ================= */}
       <motion.section 
-        className="relative min-h-screen flex flex-col items-center justify-center pt-32 text-center"
-        style={{ y: heroY, opacity: heroOpacity }} // Apply Parallax Effect
+        className="relative min-h-screen flex flex-col items-center justify-center pt-20 pb-10 text-center px-4"
+        style={{ y: heroY, opacity: heroOpacity }}
       >
-       <motion.div
-  initial={{ scale: 0, opacity: 0 }}
-  animate={{ scale: 1, opacity: 1 }}
-  transition={{ duration: 1, type: "spring", stiffness: 100 }}
-  className="w-40 h-40 rounded-full border-4 border-cyan-400 flex items-center justify-center mb-8 relative z-10 bg-[#0b1220]/30 backdrop-blur-sm overflow-hidden"
->
-  <img
-    src={Profilepic}
-    alt="Profile"
-    className="w-full h-full object-cover rounded-full"
-  />
-</motion.div>
+        <motion.div
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 0.8, type: "spring", stiffness: 100 }}
+          className="w-36 h-36 md:w-44 md:h-44 rounded-full border border-gray-700 p-1 mb-8 bg-[#0b1220]/50 backdrop-blur-md"
+        >
+          <img
+            src={Profilepic}
+            alt="Amanraj S - Profile"
+            className="w-full h-full object-cover rounded-full"
+          />
+        </motion.div>
 
         <motion.h1 
-          initial={{ y: 30, opacity: 0 }}
+          initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.3, duration: 0.8 }}
-          className="text-6xl md:text-7xl font-bold bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 bg-clip-text text-transparent"
+          transition={{ delay: 0.2, duration: 0.6 }}
+          className="text-5xl md:text-7xl font-extrabold tracking-tight text-white mb-4"
         >
           Amanraj S
         </motion.h1>
 
-        <motion.p 
-          initial={{ y: 30, opacity: 0 }}
+        <motion.h2 
+          initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.5, duration: 0.8 }}
-          className="text-2xl text-gray-300 mt-4"
+          transition={{ delay: 0.3, duration: 0.6 }}
+          className="text-xl md:text-2xl font-medium bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent"
         >
           Full Stack Developer
-        </motion.p>
+        </motion.h2>
 
         <motion.p 
-          initial={{ y: 30, opacity: 0 }}
+          initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.7, duration: 0.8 }}
-          className="text-lg text-gray-400 mt-6 max-w-xl"
+          transition={{ delay: 0.4, duration: 0.6 }}
+          className="text-base md:text-lg text-gray-400 mt-6 max-w-lg leading-relaxed"
         >
-          Crafting beautiful digital experiences with modern technologies.
+          Crafting scalable, beautiful, and user-centric digital experiences with modern web technologies.
         </motion.p>
 
-        {/* Social Icons with staggered entrance */}
-        <div className="flex gap-6 mt-10">
-          {socialLinks.map((s, i) => (
-            <motion.a
+        <motion.div 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.6 }}
+          className="flex gap-4 mt-10"
+        >
+          {socialLinks.map((link, i) => (
+            <a
               key={i}
-              href={s.href}
+              href={link.href}
               target="_blank"
-              rel="noreferrer"
-              initial={{ opacity: 0, scale: 0 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.8 + i * 0.1, type: "spring" }}
-              className={`p-4 bg-[#0b1220] border border-gray-700 rounded-full hover:bg-cyan-500/10 ${s.color}`}
-              whileHover={{ scale: 1.2, rotate: 5 }}
-              whileTap={{ scale: 0.9 }}
+              rel="noopener noreferrer"
+              aria-label={link.name}
+              className={`p-3 bg-[#0f172a] border border-gray-800 rounded-lg text-gray-400 transition-all duration-300 ${link.color}`}
             >
-              <s.icon size={24} />
-            </motion.a>
+              <link.icon size={22} />
+            </a>
           ))}
-        </div>
+        </motion.div>
       </motion.section>
 
       {/* ================= ABOUT ================= */}
-      <section id="about" className="py-32 relative z-10">
-        <div className="max-w-5xl mx-auto px-6 text-center">
+      <section id="about" className="py-24 relative z-10 border-t border-gray-800/50 bg-[#020617]/50">
+        <div className="max-w-4xl mx-auto px-6 text-center">
           <motion.h2 
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-100px" }}
-            variants={fadeInUp}
-            className="text-5xl font-bold mb-12 bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent"
+            initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeInUp}
+            className="text-3xl md:text-4xl font-bold mb-10 text-white flex items-center justify-center gap-3"
           >
-            <Sparkles className="inline text-cyan-400 mr-2" />
+            <Sparkles className="text-cyan-400" size={28} />
             About Me
           </motion.h2>
 
           <motion.div 
-            initial={{ opacity: 0, scale: 0.9 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true, margin: "-100px" }}
-            transition={{ duration: 0.8 }}
-            className="bg-[#0b1220]/60 p-10 rounded-3xl border border-gray-800 shadow-xl backdrop-blur-md"
+            initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeInUp}
+            className="text-gray-300 space-y-6 text-lg leading-relaxed bg-[#0f172a]/50 p-8 md:p-12 rounded-2xl border border-gray-800/50"
           >
-            <p className="text-lg text-gray-300 mb-6 leading-relaxed">
-              I'm a passionate Full Stack Developer pursuing{" "}
-              <span className="text-cyan-400 font-semibold">B.Tech in IT</span>{" "}
-              at{" "}
-              <span className="text-blue-400 font-semibold">
-                Sathyabama Institute of Science and Technology
-              </span>.
+            <p>
+              I am a passionate Full Stack Developer currently pursuing a{" "}
+              <span className="text-white font-semibold">B.Tech in IT</span> at{" "}
+              <span className="text-white font-semibold">Sathyabama Institute of Science and Technology</span>.
             </p>
-
-            <p className="text-lg text-gray-300 mb-6 leading-relaxed">
-              I specialize in building full-stack applications with clean,
-              modern UI/UX interfaces.
-            </p>
-
-            <p className="text-lg text-gray-300 leading-relaxed">
-              Skilled in{" "}
-              <span className="text-cyan-400 font-semibold">Python</span>,{" "}
-              <span className="text-blue-400 font-semibold">React</span>,{" "}
-              <span className="text-green-400 font-semibold">Node.js</span>,{" "}
-              <span className="text-green-500 font-semibold">MongoDB</span>, and{" "}
-              <span className="text-cyan-300 font-semibold">Tailwind CSS</span>.
+            <p>
+              My focus is on bridging the gap between elegant frontend interfaces and robust backend architectures. I specialize in building responsive applications that deliver exceptional user experiences.
             </p>
           </motion.div>
         </div>
       </section>
 
-      {/* ================= TECH STACK (Staggered Grid) ================= */}
-      <section id="tech-stack" className="py-32 relative z-10">
-        <div className="max-w-6xl mx-auto px-6 text-center">
+      {/* ================= TECH STACK ================= */}
+      <section id="tech-stack" className="py-24 relative z-10">
+        <div className="max-w-5xl mx-auto px-6">
           <motion.h2 
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            variants={fadeInUp}
-            className="text-5xl font-bold mb-16 bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent"
+            initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeInUp}
+            className="text-3xl md:text-4xl font-bold mb-14 text-center text-white flex items-center justify-center gap-3"
           >
-            <Code2 className="inline mr-3 text-cyan-400" />
-            Tech Stack
+            <Code2 className="text-cyan-400" size={32} />
+            Technologies
           </motion.h2>
 
           <motion.div 
-            variants={staggerContainer}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-100px" }}
-            className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-10"
+            variants={staggerContainer} initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }}
+            className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-6"
           >
-            {techItems.map((t, i) => (
+            {techItems.map((tech, i) => (
               <motion.div
-                key={i}
-                variants={fadeInUp}
-                className="p-6 rounded-2xl bg-[#0d1627] border border-gray-800 shadow-xl flex flex-col items-center group"
-                whileHover={{ 
-                  scale: 1.1, 
-                  borderColor: "rgba(34, 211, 238, 0.4)",
-                  backgroundColor: "rgba(13, 22, 39, 0.9)" 
-                }}
+                key={i} variants={fadeInUp}
+                className="flex flex-col items-center justify-center p-6 rounded-xl bg-[#0f172a] border border-gray-800/60 hover:border-cyan-500/30 transition-colors group"
               >
                 <img
-                  src={t.img}
-                  alt={t.name}
-                  className="w-16 h-16 object-contain mb-4 rounded-lg group-hover:drop-shadow-[0_0_15px_rgba(6,182,212,0.5)] transition-all duration-300"
+                  src={tech.img} alt={tech.name}
+                  className="w-12 h-12 object-contain mb-4 grayscale group-hover:grayscale-0 transition-all duration-300"
                 />
-                <p className="text-lg font-semibold">{t.name}</p>
+                <span className="text-sm font-medium text-gray-400 group-hover:text-white transition-colors">{tech.name}</span>
               </motion.div>
             ))}
           </motion.div>
@@ -357,71 +275,53 @@ const Home = () => {
       </section>
 
       {/* ================= PROJECTS ================= */}
-      <section id="projects" className="py-32 relative z-10">
-        <div className="max-w-7xl mx-auto px-6 text-center">
+      <section id="projects" className="py-24 relative z-10 border-t border-gray-800/50 bg-[#020617]/50">
+        <div className="max-w-6xl mx-auto px-6">
           <motion.h2 
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            variants={fadeInUp}
-            className="text-5xl font-bold mb-10 bg-gradient-to-r from-cyan-400 to-purple-500 bg-clip-text text-transparent"
+            initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeInUp}
+            className="text-3xl md:text-4xl font-bold mb-14 text-center text-white"
           >
-            Featured Projects
+            Featured Work
           </motion.h2>
 
           <motion.div 
-            variants={staggerContainer}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-100px" }}
-            className="grid grid-cols-1 md:grid-cols-3 gap-8"
+            variants={staggerContainer} initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }}
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
           >
-            {projects.map((p, i) => (
+            {projects.map((project, i) => (
               <motion.div
-                key={i}
-                variants={fadeInUp}
-                whileHover={{ y: -10 }} // Lift card on hover
-                className="bg-[#0d1627]/80 rounded-2xl border border-gray-800 shadow-xl overflow-hidden group hover:border-cyan-500/30 transition-colors duration-300"
+                key={i} variants={fadeInUp}
+                className="flex flex-col bg-[#0f172a] rounded-2xl border border-gray-800/60 overflow-hidden group hover:border-cyan-500/30 transition-all duration-300"
               >
-                <div 
-                  className={`h-48 flex items-center justify-center overflow-hidden relative ${p.img ? "bg-gradient-to-br" : "bg-gray-800"}`}
-                >
-                    {/* Image Zoom Effect on Hover */}
-                    {p.img ? (
-                        <div 
-                           className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110"
-                           style={{ backgroundImage: `url(${p.img})` }} 
-                        />
-                    ) : (
-                        <Code2 size={48} className="relative z-10" />
-                    )}
-                    {/* Overlay for better text readability if needed */}
-                    <div className="absolute inset-0 bg-black/20 group-hover:bg-black/0 transition-colors duration-300" />
+                <div className="h-48 relative overflow-hidden bg-gray-900">
+                  {project.img ? (
+                    <img 
+                      src={project.img} 
+                      alt={project.title} 
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                    />
+                  ) : (
+                    <div className="flex h-full items-center justify-center text-gray-600"><Code2 size={40}/></div>
+                  )}
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#0f172a] to-transparent opacity-80" />
                 </div>
 
-                <div className="p-6 text-left relative z-10 bg-[#0d1627]">
-                  <h3 className="text-2xl font-bold mb-2 group-hover:text-cyan-400 transition-colors">{p.title}</h3>
-                  <p className="text-gray-400 mb-4 h-12 overflow-hidden">{p.description}</p>
+                <div className="p-6 flex flex-col flex-grow">
+                  <h3 className="text-xl font-bold text-white mb-2">{project.title}</h3>
+                  <p className="text-sm text-gray-400 mb-6 flex-grow">{project.description}</p>
 
-                  <div className="flex gap-3 mt-auto">
+                  <div className="flex gap-4 mt-auto">
                     <a
-                      href={p.demo}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="flex-1 px-3 py-2 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-md text-black font-semibold inline-flex items-center justify-center gap-2 hover:brightness-110 transition-all"
+                      href={project.demo} target="_blank" rel="noopener noreferrer"
+                      className="flex-1 text-sm py-2.5 bg-cyan-500/10 text-cyan-400 hover:bg-cyan-500 hover:text-white rounded-lg font-medium inline-flex items-center justify-center gap-2 transition-all duration-300"
                     >
-                      <ExternalLink size={16} />
-                      Demo
+                      <ExternalLink size={16} /> Live Demo
                     </a>
-
                     <a
-                      href={p.code}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="flex-1 px-3 py-2 border border-gray-800 rounded-md text-white inline-flex items-center justify-center gap-2 hover:bg-gray-800 transition-all"
+                      href={project.code} target="_blank" rel="noopener noreferrer"
+                      className="flex-1 text-sm py-2.5 border border-gray-700 text-gray-300 hover:bg-gray-800 hover:text-white rounded-lg font-medium inline-flex items-center justify-center gap-2 transition-all duration-300"
                     >
-                      <Github size={16} />
-                      Code
+                      <Github size={16} /> Source
                     </a>
                   </div>
                 </div>
@@ -432,90 +332,69 @@ const Home = () => {
       </section>
 
       {/* ================= CONTACT ================= */}
-      <section id="contact" className="py-32 relative z-10">
-        <div className="max-w-3xl mx-auto px-6 text-center">
+      <section id="contact" className="py-24 relative z-10">
+        <div className="max-w-xl mx-auto px-6">
           <motion.h2 
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            variants={fadeInUp}
-            className="text-5xl font-bold mb-16 bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent"
+            initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeInUp}
+            className="text-3xl md:text-4xl font-bold mb-10 text-center text-white flex items-center justify-center gap-3"
           >
-            <Mail className="inline mr-3 text-cyan-400" />
+            <Mail className="text-cyan-400" size={32} />
             Get In Touch
           </motion.h2>
 
           <motion.form
-            ref={form}
-            onSubmit={sendEmail}
-            initial={{ opacity: 0, scale: 0.95 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="bg-[#0b1220]/80 p-10 rounded-3xl border border-gray-800 shadow-2xl space-y-6 backdrop-blur-md"
+            ref={form} onSubmit={sendEmail}
+            initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeInUp}
+            className="bg-[#0f172a] p-8 md:p-10 rounded-2xl border border-gray-800/60 shadow-xl space-y-5"
           >
-            <div className="space-y-2 text-left">
-                <input
-                  type="text"
-                  name="user_name"
-                  placeholder="Your Name"
-                  required
-                  className="w-full p-4 bg-[#0d1627] border border-gray-700 rounded-xl focus:border-cyan-400 focus:outline-none focus:ring-1 focus:ring-cyan-400 transition-all duration-300 placeholder-gray-500"
-                />
+            {/* Custom Form Alert UI */}
+            {formStatus.message && (
+              <div className={`p-4 rounded-lg flex items-center gap-3 text-sm ${formStatus.type === 'success' ? 'bg-green-500/10 border border-green-500/20 text-green-400' : 'bg-red-500/10 border border-red-500/20 text-red-400'}`}>
+                {formStatus.type === 'success' ? <CheckCircle2 size={18}/> : <XCircle size={18}/>}
+                {formStatus.message}
+              </div>
+            )}
+
+            <div>
+              <label htmlFor="user_name" className="sr-only">Name</label>
+              <input
+                id="user_name" type="text" name="user_name" placeholder="Name" required
+                className="w-full p-3.5 bg-[#020617] border border-gray-800 rounded-lg focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all outline-none text-gray-200 placeholder-gray-500 text-sm"
+              />
             </div>
 
-            <div className="space-y-2 text-left">
-                <input
-                  type="email"
-                  name="user_email"
-                  placeholder="Your Email"
-                  required
-                  className="w-full p-4 bg-[#0d1627] border border-gray-700 rounded-xl focus:border-cyan-400 focus:outline-none focus:ring-1 focus:ring-cyan-400 transition-all duration-300 placeholder-gray-500"
-                />
+            <div>
+              <label htmlFor="user_email" className="sr-only">Email</label>
+              <input
+                id="user_email" type="email" name="user_email" placeholder="Email Address" required
+                className="w-full p-3.5 bg-[#020617] border border-gray-800 rounded-lg focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all outline-none text-gray-200 placeholder-gray-500 text-sm"
+              />
             </div>
 
-            <div className="space-y-2 text-left">
-                <textarea
-                  name="message"
-                  rows="5"
-                  placeholder="Your Message"
-                  required
-                  className="w-full p-4 bg-[#0d1627] border border-gray-700 rounded-xl resize-none focus:border-cyan-400 focus:outline-none focus:ring-1 focus:ring-cyan-400 transition-all duration-300 placeholder-gray-500"
-                />
+            <div>
+              <label htmlFor="message" className="sr-only">Message</label>
+              <textarea
+                id="message" name="message" rows="5" placeholder="How can I help you?" required
+                className="w-full p-3.5 bg-[#020617] border border-gray-800 rounded-lg resize-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all outline-none text-gray-200 placeholder-gray-500 text-sm"
+              />
             </div>
 
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              type="submit"
-              disabled={sending}
-              className={`w-full py-4 rounded-xl font-bold text-lg shadow-lg ${sending ? "bg-gray-600" : "bg-gradient-to-r from-cyan-500 to-blue-500 hover:shadow-cyan-500/25"} transition-all duration-300`}
+            <button
+              type="submit" disabled={sending}
+              className={`w-full py-3.5 rounded-lg font-medium text-sm transition-all duration-300 flex justify-center items-center gap-2
+                ${sending ? "bg-gray-800 text-gray-500 cursor-not-allowed" : "bg-cyan-500 hover:bg-cyan-400 text-gray-900"}`}
             >
-              {sending ? "Sending..." : "Send Message"}
-            </motion.button>
+              {sending ? "Sending Message..." : "Send Message"}
+            </button>
           </motion.form>
-
-          <div className="flex justify-center gap-6 mt-10">
-            {socialLinks.map((s, i) => (
-              <motion.a
-                key={i}
-                href={s.href}
-                target="_blank"
-                rel="noreferrer"
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-                className="p-5 bg-[#0b1220] border border-gray-700 rounded-full hover:bg-cyan-500/10 transition-colors"
-                whileHover={{ scale: 1.2 }}
-              >
-                <s.icon size={26} />
-              </motion.a>
-            ))}
-          </div>
         </div>
       </section>
-    </div>
+
+      {/* Footer */}
+      <footer className="py-8 text-center text-gray-500 text-sm border-t border-gray-800/50 bg-[#020617]">
+        <p>© {new Date().getFullYear()} Amanraj S. All rights reserved.</p>
+      </footer>
+    </main>
   );
 };
 
